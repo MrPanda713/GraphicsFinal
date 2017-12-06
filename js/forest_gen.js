@@ -3,26 +3,38 @@ var scene;
 var renderer;
 var controls;
 
-var worldWidth = 256, worldDepth = 256, worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
+var worldWidth = 512, worldDepth = 512, worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
+
+var light_summer = [0xfeffe0, 0.9];
+var summer_ground = 'textures/terrain2.jpg';
+var summer_bump = 'textures/hill_map.jpg';
+var fog_summer = [0xb2f3ff, 0.0006];
+
+var light, ground, bump, fog;
 
 init();
 animate();
 
 function init() {
     
+	light = light_summer;
+	ground = summer_ground;
+	bump = summer_bump;
+	fog = fog_summer;
+	
 	// Create a scene
 	scene = new THREE.Scene();
     
 	// Add the camera
-	camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000);
+	camera = new THREE.PerspectiveCamera( 100, window.innerWidth / window.innerHeight, 1, 10000);
 	camera.position.set(-0, 1000, 30);
 
 	// Add a light
-	var light = new THREE.SpotLight(0xfff7bf, 0.4);
+	var light = new THREE.SpotLight(light_summer[0], light_summer[1]);
 	light.position.set(7500, 2800, -7500);
 	scene.add(light);
 		
-	var amb = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.2);
+	var amb = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
 	scene.add(amb);
 		
 	// Create the sky box
@@ -42,6 +54,26 @@ function init() {
 	// Add resize event listener
 	window.addEventListener('resize',onWindowResize,false);
 	
+	document.getElementById("spring").onclick = function() {
+			
+	}
+	
+	document.getElementById("winter").onclick = function() {
+		
+		
+	}
+	document.getElementById("summer").onclick = function() {
+		light = light_summer;
+		ground = summer_ground;
+		bump = summer_bump;
+		fog = fog_summer;
+		
+	}
+	document.getElementById("fall").onclick = function() {
+		
+		
+	}
+	
 	// Add the orbit controls
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.target = new THREE.Vector3(0,0,0);  
@@ -51,12 +83,12 @@ function loadSkyBox() {
 	
 	// Load the skybox images and create list of materials
 	var materials = [
-		createMaterial( 'textures/cube/spring/left.jpg' ), // right
-		createMaterial( 'textures/cube/spring/right.jpg' ), // left
-		createMaterial( 'textures/cube/spring/top.jpg' ), // top
-		createMaterial( 'textures/cube/spring/bottom.jpg' ), // bottom
-		createMaterial( 'textures/cube/spring/back.jpg' ), // back
-		createMaterial( 'textures/cube/spring/front.jpg' )  // front
+		createMaterial( 'textures/cube/summer/left.jpg' ), // right
+		createMaterial( 'textures/cube/summer/right.jpg' ), // left
+		createMaterial( 'textures/cube/summer/top.jpg' ), // top
+		createMaterial( 'textures/cube/summer/bottom.jpg' ), // bottom
+		createMaterial( 'textures/cube/summer/back.jpg' ), // back
+		createMaterial( 'textures/cube/summer/front.jpg' )  // front
 	];
 		
 	// Create a large cube
@@ -99,7 +131,7 @@ function addSceneElements() {
 	
 	var vertices = geo.attributes.position.array;
 	for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
-		vertices[ j + 1 ] = data[ i ] * 10;
+		vertices[ j + 1 ] = data[ i ] * 5;
 	}
 	
 	var groundMesh = new THREE.Mesh( geo, groundMat);
@@ -108,7 +140,7 @@ function addSceneElements() {
 	
 	scene.add(groundMesh);
 	
-	scene.fog = new THREE.FogExp2( 0xefe1e5, 0.0005 );
+	scene.fog = new THREE.FogExp2( fog_summer[0], fog_summer[1] );
 }
 
 
@@ -141,9 +173,9 @@ function generateHeight( width, height ) {
 	for ( var j = 0; j < 4; j ++ ) {
 		for ( var i = 0; i < size; i ++ ) {
 			var x = i % width, y = ~~ ( i / width );
-			data[ i ] += Math.abs( perlin.noise( x / quality, y / quality, z ) * quality * 1 );
+			data[ i ] += Math.abs( perlin.noise( x / quality, y / quality, z ) * quality * 0.25 );
 		}
-		quality *= 3;
+		quality *= 10;
 	}
 	return data;
 }
