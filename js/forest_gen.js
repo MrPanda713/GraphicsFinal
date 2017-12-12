@@ -9,13 +9,19 @@ var light_summer = [0xfeffe0, 0.9];
 var summer_ground = 'textures/summer_ground.jpg';
 var summer_bump = 'textures/summer_bump.jpg';
 var fog_summer = [0xb2f3ff, 0.0006];
+var tree_t_summer = 'models/';
+var tree_m_summer = 'models/';
 
 var light_winter = [0xdedede, 0.7];
 var winter_ground = 'textures/winter_ground.jpg';
 var winter_bump = 'textures/winter_bumps.jpg';
 var fog_winter = [0xd3f7ff, 0.0008];
+var tree_t_winter = 'models/';
+var tree_m_winter = 'models/';
 
 var lights, ground, bump, fog;
+
+var tree_t_path, tree_m_path;
 
 var ground_mat;
 
@@ -23,6 +29,10 @@ lights = light_summer;
 ground = summer_ground;
 bump = summer_bump;
 fog = fog_summer;
+
+tree_t_path = tree_t_summer;
+
+tree_m_path = tree_m_summer;
 	
 init();
 animate();
@@ -204,6 +214,35 @@ function animate() {
 	// Repeat
 	requestAnimationFrame( animate );
     
+}
+
+function loadTree(){
+	// texture
+	var manager = new THREE.LoadingManager();
+	manager.onProgress = function ( item, loaded, total ) {
+		console.log( item, loaded, total );
+	};
+	var textureLoader = new THREE.TextureLoader( manager );
+	var tree_texture = textureLoader.load( tree_t_path );
+	// model
+	var onProgress = function ( xhr ) {
+		if ( xhr.lengthComputable ) {
+			var percentComplete = xhr.loaded / xhr.total * 100;
+			console.log( Math.round(percentComplete, 2) + '% downloaded' );
+		}
+	};
+	var onError = function ( xhr ) {
+	};
+	var loader = new THREE.OBJLoader( manager );
+	loader.load( tree_m_path, function ( object ) {
+	object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				child.material.map = tree_texture;
+			}
+		} );
+		object.position.y = - 95;	// Replace With Randomness, add scaling randomness
+		scene.add( object );
+	}, onProgress, onError );
 }
 
 function generateHeight( width, height ) {
