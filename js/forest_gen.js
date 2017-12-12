@@ -6,37 +6,38 @@ var controls;
 var worldWidth = 512, worldDepth = 512, worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
 
 var light_summer = [0xfeffe0, 0.9];
-var summer_ground = 'textures/terrain2.jpg';
-var summer_bump = 'textures/hill_map.jpg';
+var summer_ground = 'textures/summer_ground.jpg';
+var summer_bump = 'textures/summer_bump.jpg';
 var fog_summer = [0xb2f3ff, 0.0006];
 
-var light, ground, bump, fog;
+var light_winter = [0xdedede, 0.7];
+var winter_ground = 'textures/winter_ground.jpg';
+var winter_bump = 'textures/winter_bumps.jpg';
+var fog_winter = [0xd3f7ff, 0.0008];
 
+var lights, ground, bump, fog;
+
+var ground_mat;
+
+lights = light_summer;
+ground = summer_ground;
+bump = summer_bump;
+fog = fog_summer;
+	
 init();
 animate();
 
 function init() {
     
-	light = light_summer;
-	ground = summer_ground;
-	bump = summer_bump;
-	fog = fog_summer;
-	
 	// Create a scene
 	scene = new THREE.Scene();
-    
+
 	// Add the camera
 	camera = new THREE.PerspectiveCamera( 100, window.innerWidth / window.innerHeight, 1, 10000);
 	camera.position.set(-0, 1000, 30);
 
-	// Add a light
-	var light = new THREE.SpotLight(light_summer[0], light_summer[1]);
-	light.position.set(7500, 2800, -7500);
-	scene.add(light);
-		
-	var amb = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
-	scene.add(amb);
-		
+	addLights();
+	
 	// Create the sky box
 	loadSkyBox();
 		
@@ -54,29 +55,62 @@ function init() {
 	// Add resize event listener
 	window.addEventListener('resize',onWindowResize,false);
 	
-	document.getElementById("spring").onclick = function() {
-			
-	}
-	
-	document.getElementById("winter").onclick = function() {
-		
-		
-	}
-	document.getElementById("summer").onclick = function() {
-		light = light_summer;
-		ground = summer_ground;
-		bump = summer_bump;
-		fog = fog_summer;
-		
-	}
-	document.getElementById("fall").onclick = function() {
-		
-		
-	}
-	
 	// Add the orbit controls
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.target = new THREE.Vector3(0,0,0);  
+}
+
+document.getElementById("spring").onclick = function() {
+			
+}
+	
+document.getElementById("winter").onclick = function() {
+	lights = light_winter;
+	ground = winter_ground;
+	bump = winter_bump;
+	fog = fog_winter;	
+	
+	buttonPress();
+}
+
+document.getElementById("summer").onclick = function() {
+	lights = light_summer;
+	ground = summer_ground;
+	bump = summer_bump;
+	fog = fog_summer;
+	
+	buttonPress();
+}
+
+document.getElementById("fall").onclick = function() {
+		
+}
+
+function buttonPress(){
+	resetScene();
+	addLights();
+	
+	// Create the sky box
+	loadSkyBox();
+		
+	// Add scene elements
+	addSceneElements();
+}
+
+function resetScene(){
+	while(scene.children.length > 0){
+		scene.remove(scene.children[0]);
+	}
+}
+
+function addLights(){
+	// Add a light
+	var light = new THREE.SpotLight(lights[0], lights[1]);
+	light.position.set(7500, 2800, -7500);
+	scene.add(light);
+		
+	amb = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
+	scene.add(amb);
 }
 
 function loadSkyBox() {
@@ -102,28 +136,33 @@ function loadSkyBox() {
 function createMaterial( path ) {
 	var texture = new THREE.TextureLoader().load(path);
 	var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
-
+	material.needsUpdate = true;
 	return material; 
 }
 
-function addSceneElements() {
-// Create the ground using a Plane
+function loadGround(){
 	// Load the texture for the ground
-	var groundTexture = new THREE.TextureLoader().load('textures/terrain2.jpg');
+	var groundTexture = new THREE.TextureLoader().load(ground);
 	groundTexture.wrapS = THREE.RepeatWrapping;
 	groundTexture.wrapT = THREE.RepeatWrapping;
 	
 	// Load bump map for the ground
-	var groundBump = new THREE.TextureLoader().load('textures/hill_map.jpg');
+	var groundBump = new THREE.TextureLoader().load(bump);
 	groundBump.wrapS = THREE.RepeatWrapping;
 	groundBump.wrapT = THREE.RepeatWrapping;
 	
-	// Terrain Height
-	var data = generateHeight( worldWidth, worldDepth );
 	
 	// Create the material
-	var groundMat = new THREE.MeshPhongMaterial( { map: groundTexture, bumpMap: groundBump } );
+	groundMat = new THREE.MeshPhongMaterial( { map: groundTexture, bumpMap: groundBump } );
 	groundMat.map.repeat.set(10,10);
+}
+
+function addSceneElements() {
+// Create the ground using a Plane
+	loadGround();
+	
+	// Terrain Height
+	var data = generateHeight( worldWidth, worldDepth );
 	
 	// Create the mesh
 	var geo = new THREE.PlaneBufferGeometry(7500, 7500, worldWidth - 1, worldDepth - 1);
@@ -140,7 +179,7 @@ function addSceneElements() {
 	
 	scene.add(groundMesh);
 	
-	scene.fog = new THREE.FogExp2( fog_summer[0], fog_summer[1] );
+	scene.fog = new THREE.FogExp2( fog[0], fog[1] );
 }
 
 
