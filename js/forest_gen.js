@@ -3,27 +3,30 @@ var scene;
 var renderer;
 var controls;
 
-var worldWidth = 512, worldDepth = 512, worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
+var worldWidth = 2048, worldDepth = 2048, worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
 
 var light_summer = [0xfeffe0, 0.9];
 var summer_ground = 'textures/summer_ground.jpg';
 var summer_bump = 'textures/summer_bump.jpg';
 var fog_summer = [0xb2f3ff, 0.0006];
-var tree_t_summer = 'models/';
-var tree_m_summer = 'models/';
+var tree_t_summer = 'tree.mtl';
+var tree_m_summer = 'tree.obj';
 
 var light_winter = [0xdedede, 0.7];
 var winter_ground = 'textures/winter_ground.jpg';
 var winter_bump = 'textures/winter_bumps.jpg';
 var fog_winter = [0xd3f7ff, 0.0008];
-var tree_t_winter = 'models/';
-var tree_m_winter = 'models/';
+var tree_t_winter = 'tree.mtl';
+var tree_m_winter = 'tree.obj';
 
 var lights, ground, bump, fog;
 
 var tree_t_path, tree_m_path;
 
-var ground_mat;
+var data_master, vertices;
+var ground_mat, height;
+
+var n_trees = 2000;
 
 lights = light_summer;
 ground = summer_ground;
@@ -80,6 +83,9 @@ document.getElementById("winter").onclick = function() {
 	bump = winter_bump;
 	fog = fog_winter;	
 	
+	tree_t_path = tree_t_winter;
+	tree_t_path = tree_t_winter;
+	
 	buttonPress();
 }
 
@@ -88,6 +94,10 @@ document.getElementById("summer").onclick = function() {
 	ground = summer_ground;
 	bump = summer_bump;
 	fog = fog_summer;
+	
+	tree_t_path = tree_t_summer;
+
+	tree_m_path = tree_m_summer;
 	
 	buttonPress();
 }
@@ -172,29 +182,48 @@ function addSceneElements() {
 	loadGround();
 	
 	// Terrain Height
-	var data = generateHeight( worldWidth, worldDepth );
+	data_master = generateHeight( worldWidth, worldDepth );
 	
 	// Create the mesh
 	var geo = new THREE.PlaneBufferGeometry(7500, 7500, worldWidth - 1, worldDepth - 1);
 	geo.rotateX( - Math.PI / 2 );
 	
-	var vertices = geo.attributes.position.array;
-	for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
-		vertices[ j + 1 ] = data[ i ] * 5;
+	height = new Array(7500);
+	for(var i = 0; i<7500; i++){
+		height[i] = new Array(7500);
 	}
+	
+	vertices = geo.attributes.position.array;
+	console.log(geo.attributes.position.count);
+	for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
+		vertices[ j + 1 ] = data_master[ i ] * 5;
+		if(vertices[j] < 3750){
+			height[ Math.round(vertices[j]+3750) ][ Math.round(vertices[j+2]+3750) ] = vertices[j+1];
+		}
+	}
+	
 	
 	var groundMesh = new THREE.Mesh( geo, groundMat);
 	groundMesh.rotation.set(-90 * (3.14/180), 0, 0, 'YZ');
 	groundMesh.position.set(0,0,0);
 	
 	scene.add(groundMesh);
+	scene.updateMatrixWorld(true);
+	
+	for(var i = 0; i < n_trees; i++){
+		loadTree();
+	}
 	
 	scene.fog = new THREE.FogExp2( fog[0], fog[1] );
 }
 
 
-function onProgress(progress) {
+function onProgress(xhr) {
 	// Use this to track loading progress
+	if ( xhr.lengthComputable ) {
+		var percentComplete = xhr.loaded / xhr.total * 100;
+		console.log( Math.round(percentComplete, 2) + '% downloaded' );
+	}
 }
 
 function onError(error) {
@@ -217,32 +246,27 @@ function animate() {
 }
 
 function loadTree(){
-	// texture
-	var manager = new THREE.LoadingManager();
-	manager.onProgress = function ( item, loaded, total ) {
-		console.log( item, loaded, total );
-	};
-	var textureLoader = new THREE.TextureLoader( manager );
-	var tree_texture = textureLoader.load( tree_t_path );
-	// model
-	var onProgress = function ( xhr ) {
-		if ( xhr.lengthComputable ) {
-			var percentComplete = xhr.loaded / xhr.total * 100;
-			console.log( Math.round(percentComplete, 2) + '% downloaded' );
-		}
-	};
-	var onError = function ( xhr ) {
-	};
-	var loader = new THREE.OBJLoader( manager );
-	loader.load( tree_m_path, function ( object ) {
-	object.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
-				child.material.map = tree_texture;
-			}
-		} );
-		object.position.y = - 95;	// Replace With Randomness, add scaling randomness
-		scene.add( object );
-	}, onProgress, onError );
+
+	var mtlLoader = new THREE.MTLLoader();
+	mtlLoader.setPath( 'models/' );
+	mtlLoader.load( tree_t_path, function( materials ) {
+		materials.preload();
+		var objLoader = new THREE.OBJLoader();
+		objLoader.setMaterials( materials );
+		objLoader.setPath( 'models/' );
+		objLoader.load( tree_m_path, function ( object ) {
+			var x = Math.random() * 7500 - 3750;
+			var z = Math.random() * 7500 - 3750;
+			object.position.y = height[Math.round(x)+3750][Math.round(z)+3750];
+			if(!object.position.y)
+				object.position.y = 100 + Math.random() * 100;
+			object.position.x = x;
+			object.position.z = z;
+			var s = Math.random()*50 + 25;
+			object.scale.set(s,s,s);
+			scene.add( object );
+		}, onProgress, onError );
+	});
 }
 
 function generateHeight( width, height ) {
