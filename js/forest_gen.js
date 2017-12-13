@@ -9,8 +9,8 @@ var light_summer = [0xfeffe0, 0.9];
 var summer_ground = 'textures/summer_ground.jpg';
 var summer_bump = 'textures/summer_bump.jpg';
 var fog_summer = [0xb2f3ff, 0.0006];
-var tree_t_summer = 'tree.mtl';
-var tree_m_summer = 'tree.obj';
+var tree_t_summer = 's_tree.mtl';
+var tree_m_summer = 's_tree.obj';
 
 var light_winter = [0xdedede, 0.7];
 var winter_ground = 'textures/winter_ground.jpg';
@@ -40,7 +40,7 @@ var tree_t_path, tree_m_path;
 var data_master, vertices;
 var ground_mat, height;
 
-var n_trees = 2000;
+var n_trees = 1000;
 
 lights = light_summer;
 ground = summer_ground;
@@ -93,6 +93,9 @@ document.getElementById("spring").onclick = function() {
 	bump = spring_bump;
 	fog = fog_spring;
 	
+	tree_t_path = tree_t_spring;
+	tree_m_path = tree_m_spring;
+	
 	buttonPress();		
 }
 	
@@ -104,7 +107,7 @@ document.getElementById("winter").onclick = function() {
 	console.log("in winter");
 	
 	tree_t_path = tree_t_winter;
-	tree_t_path = tree_t_winter;
+	tree_m_path = tree_m_winter;
 	
 	buttonPress();
 }
@@ -127,6 +130,9 @@ document.getElementById("fall").onclick = function() {
 	ground = autumn_ground;
 	bump = autumn_bump;
 	fog = fog_autumn;
+	
+	tree_t_path = tree_t_autumn;
+	tree_m_path = tree_m_autumn;
 	
 	buttonPress();
 }
@@ -297,7 +303,7 @@ function loadTree(){
 				object.position.y = 100 + Math.random() * 100;
 			object.position.x = x;
 			object.position.z = z;
-			var s = Math.random()*50 + 25;
+			var s = Math.random()*40 + 25;
 			object.scale.set(s,s,s);
 			scene.add( object );
 		}, onProgress, onError );
