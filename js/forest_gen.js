@@ -19,6 +19,20 @@ var fog_winter = [0xd3f7ff, 0.0008];
 var tree_t_winter = 'tree.mtl';
 var tree_m_winter = 'tree.obj';
 
+var light_autumn = [0xfed78a, 0.8];
+var autumn_ground = 'textures/autumn_ground.jpg';
+var autumn_bump = 'textures/autumn_bump.jpg';
+var fog_autumn = [0xfcc771, 0.0009];
+var tree_t_autumn = 'models/';
+var tree_m_autumn = 'models/';
+
+var light_spring = [0xfeffe0, 2.25];
+var spring_ground = 'textures/spring_ground.jpg';
+var spring_bump = 'textures/spring_bump.jpg';
+var fog_spring = [0xf9ffe0, 0.00035];
+var tree_t_spring = 'models/';
+var tree_m_spring = 'models/';
+
 var lights, ground, bump, fog;
 
 var tree_t_path, tree_m_path;
@@ -74,14 +88,20 @@ function init() {
 }
 
 document.getElementById("spring").onclick = function() {
-			
+	lights = light_spring;
+	ground = spring_ground;
+	bump = spring_bump;
+	fog = fog_spring;
+	
+	buttonPress();		
 }
 	
 document.getElementById("winter").onclick = function() {
 	lights = light_winter;
 	ground = winter_ground;
 	bump = winter_bump;
-	fog = fog_winter;	
+	fog = fog_winter;
+	console.log("in winter");
 	
 	tree_t_path = tree_t_winter;
 	tree_t_path = tree_t_winter;
@@ -103,7 +123,12 @@ document.getElementById("summer").onclick = function() {
 }
 
 document.getElementById("fall").onclick = function() {
-		
+	lights = light_autumn;
+	ground = autumn_ground;
+	bump = autumn_bump;
+	fog = fog_autumn;
+	
+	buttonPress();
 }
 
 function buttonPress(){
@@ -118,9 +143,15 @@ function buttonPress(){
 }
 
 function resetScene(){
-	while(scene.children.length > 0){
-		scene.remove(scene.children[0]);
+	console.log("here in reset scene");
+	var i;
+	for (var i = scene.children.length-1; i >= 0; i--) {
+		var obj = scene.children[i];
+		scene.remove(obj);
 	}
+	/*(scene.children.length > 0){
+		scene.remove(scene.children[0]);
+	} */
 }
 
 function addLights(){
@@ -134,7 +165,7 @@ function addLights(){
 }
 
 function loadSkyBox() {
-	
+	console.log("here in load skyBox");
 	// Load the skybox images and create list of materials
 	var materials = [
 		createMaterial( 'textures/cube/summer/left.jpg' ), // right
@@ -162,12 +193,15 @@ function createMaterial( path ) {
 
 function loadGround(){
 	// Load the texture for the ground
+	console.log(ground);
 	var groundTexture = new THREE.TextureLoader().load(ground);
+	groundTexture.minFilter = THREE.LinearFilter;
 	groundTexture.wrapS = THREE.RepeatWrapping;
 	groundTexture.wrapT = THREE.RepeatWrapping;
 	
 	// Load bump map for the ground
 	var groundBump = new THREE.TextureLoader().load(bump);
+	groundBump.minFilter = THREE.LinearFilter;
 	groundBump.wrapS = THREE.RepeatWrapping;
 	groundBump.wrapT = THREE.RepeatWrapping;
 	
@@ -178,6 +212,7 @@ function loadGround(){
 }
 
 function addSceneElements() {
+	console.log("here in add scene elements");
 // Create the ground using a Plane
 	loadGround();
 	
