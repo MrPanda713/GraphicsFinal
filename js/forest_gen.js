@@ -3,7 +3,7 @@ var scene;
 var renderer;
 var controls;
 
-var worldWidth = 2048, worldDepth = 2048, worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
+var worldWidth = 1250, worldDepth = 1250, worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
 
 var light_summer = [0xfeffe0, 0.9];
 var summer_ground = 'textures/summer_ground.jpg';
@@ -40,7 +40,7 @@ var tree_t_path, tree_m_path;
 var data_master, vertices;
 var ground_mat, height;
 
-var n_trees = 1000;
+var n_trees = 800;
 
 lights = light_summer;
 ground = summer_ground;
@@ -237,7 +237,7 @@ function addSceneElements() {
 	vertices = geo.attributes.position.array;
 	console.log(geo.attributes.position.count);
 	for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
-		vertices[ j + 1 ] = data_master[ i ] * 5;
+		vertices[ j + 1 ] = data_master[ i ] * 4;
 		if(vertices[j] < 3750){
 			height[ Math.round(vertices[j]+3750) ][ Math.round(vertices[j+2]+3750) ] = vertices[j+1];
 		}
@@ -299,8 +299,22 @@ function loadTree(){
 			var x = Math.random() * 7500 - 3750;
 			var z = Math.random() * 7500 - 3750;
 			object.position.y = height[Math.round(x)+3750][Math.round(z)+3750];
-			if(!object.position.y)
+/*			if(!object.position.y)
 				object.position.y = 100 + Math.random() * 100;
+*/			var xs = Math.round(x)+3750;
+			var zs = Math.round(z)+3750;
+			var nt = 32;
+			var na = 1;
+			while(!object.position.y){
+				object.position.y = height[xs][zs];
+				if(na!=0){
+					zs = zs + na;
+					na = (na + 1) % 32;
+				}else{
+					na = 1;
+					xs = xs + na;
+				}
+			}
 			object.position.x = x;
 			object.position.z = z;
 			var s = Math.random()*40 + 25;
