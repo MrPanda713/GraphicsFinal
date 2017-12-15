@@ -308,14 +308,13 @@ function loadTree(){
 				object.position.y = height[xs][zs];
 				if(na!=0){
 					zs = zs + na;
-					na = (na + 1) % 32;
+					na = (na + 1) % 10;
 				}else{
 					na = 1;
 					xs = xs + na;
 				}
 			}
-			if(object.position.y < 5)
-				object.position.y += 10;
+			
 			object.position.x = x;
 			object.position.z = z;
 			var s = Math.random()*40 + 25;
