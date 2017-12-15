@@ -303,7 +303,6 @@ function loadTree(){
 				object.position.y = 100 + Math.random() * 100;
 */			var xs = Math.round(x)+3750;
 			var zs = Math.round(z)+3750;
-			var nt = 32;
 			var na = 1;
 			while(!object.position.y){
 				object.position.y = height[xs][zs];
@@ -315,6 +314,8 @@ function loadTree(){
 					xs = xs + na;
 				}
 			}
+			if(object.position.y < 5)
+				object.position.y += 10;
 			object.position.x = x;
 			object.position.z = z;
 			var s = Math.random()*40 + 25;
