@@ -30,8 +30,8 @@ var light_spring = [0xfeffe0, 2.25];
 var spring_ground = 'textures/spring_ground.jpg';
 var spring_bump = 'textures/spring_bump.jpg';
 var fog_spring = [0xf9ffe0, 0.00035];
-var tree_t_spring = 'models/';
-var tree_m_spring = 'models/';
+var tree_t_spring = 'spr_tree.mtl';
+var tree_m_spring = 'spr_tree.obj';
 
 var lights, ground, bump, fog;
 
