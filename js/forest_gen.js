@@ -23,8 +23,8 @@ var light_autumn = [0xfed78a, 0.8];
 var autumn_ground = 'textures/autumn_ground.jpg';
 var autumn_bump = 'textures/autumn_bump.jpg';
 var fog_autumn = [0xfcc771, 0.0009];
-var tree_t_autumn = 'models/';
-var tree_m_autumn = 'models/';
+var tree_t_autumn = 'a_tree.mtl';
+var tree_m_autumn = 'a_tree.obj';
 
 var light_spring = [0xfeffe0, 2.25];
 var spring_ground = 'textures/spring_ground.jpg';
